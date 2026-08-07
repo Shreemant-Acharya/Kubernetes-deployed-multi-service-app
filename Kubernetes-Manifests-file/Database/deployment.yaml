@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata: 
-  namespace: three-tier
+  namespace: workshop
   name: mongodb
 spec: 
   replicas: 1
@@ -37,10 +37,3 @@ spec:
               secretKeyRef:
                 name: mongo-sec
                 key: password
-        volumeMounts:
-          - name: mongo-volume
-            mountPath: /data/db
-      volumes: 
-      - name: mongo-volume
-        persistentVolumeClaim:
-          claimName: mongo-volume-claim
