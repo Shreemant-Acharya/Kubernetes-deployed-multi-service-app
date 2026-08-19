@@ -1,151 +1,1024 @@
-# #TWSThreeTierAppChallenge
+# ☸️ Kubernetes Deployed Multi-Service Application
 
-## Overview
-This repository hosts the `#TWSThreeTierAppChallenge` for the TWS community. 
-The challenge involves deploying a Three-Tier Web Application using ReactJS, NodeJS, and MongoDB, with deployment on AWS EKS. Participants are encouraged to deploy the application, add creative enhancements, and submit a Pull Request (PR). Merged PRs will earn exciting prizes!
+A **three-tier containerized web application deployed on Kubernetes using AWS EKS**, consisting of a **React frontend**, **Node.js backend**, and **MongoDB database**.
 
-**Get The Challenge here**
+The project demonstrates how multiple containerized services can communicate inside a Kubernetes cluster using **Deployments, Services, Secrets, health probes, and Ingress**, while application images are stored in **Amazon ECR**.
 
-[![YouTube Video](https://img.youtube.com/vi/tvWQRTbMS1g/maxresdefault.jpg)](https://youtu.be/tvWQRTbMS1g?si=eki-boMemxr4PU7-)
+---
 
-## Prerequisites
-- Basic knowledge of Docker, and AWS services.
-- An AWS account with necessary permissions.
+## 📌 Project Overview
 
-## Challenge Steps
-- [Application Code](#application-code)
-- [Jenkins Pipeline Code](#jenkins-pipeline-code)
-- [Jenkins Server Terraform](#jenkins-server-terraform)
-- [Kubernetes Manifests Files](#kubernetes-manifests-files)
-- [Project Details](#project-details)
+This project deploys a complete three-tier application on **Amazon Elastic Kubernetes Service (EKS)**.
 
-## Application Code
-The `Application-Code` directory contains the source code for the Three-Tier Web Application. Dive into this directory to explore the frontend and backend implementations.
+The architecture consists of:
 
-## Jenkins Pipeline Code
-In the `Jenkins-Pipeline-Code` directory, you'll find Jenkins pipeline scripts. These scripts automate the CI/CD process, ensuring smooth integration and deployment of your application.
+* **Frontend** — React application
+* **Backend** — Node.js API
+* **Database** — MongoDB
+* **Container Registry** — Amazon ECR
+* **Container Orchestration** — Kubernetes
+* **Cloud Platform** — AWS EKS
+* **External Traffic Routing** — AWS Application Load Balancer
+* **Domain** — `todo.shreemant.im`
 
-## Jenkins Server Terraform
-Explore the `Jenkins-Server-TF` directory to find Terraform scripts for setting up the Jenkins Server on AWS. These scripts simplify the infrastructure provisioning process.
+Kubernetes manages the application containers, internal networking, service discovery, deployment updates, secrets, and external traffic routing.
 
-## Kubernetes Manifests Files
-The `Kubernetes-Manifests-Files` directory holds Kubernetes manifests for deploying your application on AWS EKS. Understand and customize these files to suit your project needs.
+---
 
-## Project Details
-🛠️ **Tools Explored:**
-- Terraform & AWS CLI for AWS infrastructure
-- Jenkins, Sonarqube, Terraform, Kubectl, and more for CI/CD setup
-- Helm, Prometheus, and Grafana for Monitoring
-- ArgoCD for GitOps practices
+# 🏗️ Architecture
 
-🚢 **High-Level Overview:**
-- IAM User setup & Terraform magic on AWS
-- Jenkins deployment with AWS integration
-- EKS Cluster creation & Load Balancer configuration
-- Private ECR repositories for secure image management
-- Helm charts for efficient monitoring setup
-- GitOps with ArgoCD - the cherry on top!
+```text
+                         Internet
+                            │
+                            ▼
+                    todo.shreemant.im
+                            │
+                            ▼
+                 AWS Application Load
+                       Balancer
+                            │
+                  Kubernetes Ingress
+                            │
+             ┌──────────────┴──────────────┐
+             │                             │
+             │ /                           │ /api
+             ▼                             ▼
+      Frontend Service               Backend Service
+        Port 3000                       Port 3500
+             │                             │
+             ▼                             ▼
+       React Frontend                 Node.js API
+                                           │
+                                           ▼
+                                  MongoDB Service
+                                      Port 27017
+                                           │
+                                           ▼
+                                        MongoDB
+```
 
-📈 **The journey covered everything from setting up tools to deploying a Three-Tier app, ensuring data persistence, and implementing CI/CD pipelines.**
+---
 
-## Getting Started
-To get started with this project, refer to our [comprehensive guide](https://amanpathakdevops.medium.com/advanced-end-to-end-devsecops-kubernetes-three-tier-project-using-aws-eks-argocd-prometheus-fbbfdb956d1a) that walks you through IAM user setup, infrastructure provisioning, CI/CD pipeline configuration, EKS cluster creation, and more.
+# 🔄 Request Flow
 
-### Step 1: IAM Configuration
-- Create a user `eks-admin` with `AdministratorAccess`.
-- Generate Security Credentials: Access Key and Secret Access Key.
+```text
+User
+ │
+ ▼
+todo.shreemant.im
+ │
+ ▼
+AWS Application Load Balancer
+ │
+ ▼
+Kubernetes Ingress
+ │
+ ├── /       → Frontend Service → React Pod
+ │
+ └── /api    → Backend Service  → Node.js API Pod
+                                        │
+                                        ▼
+                                MongoDB Service
+                                        │
+                                        ▼
+                                   MongoDB Pod
+```
 
-### Step 2: EC2 Setup
-- Launch an Ubuntu instance in your favourite region (eg. region `us-west-2`).
-- SSH into the instance from your local machine.
+The Ingress controller routes requests based on the URL path:
 
-### Step 3: Install AWS CLI v2
-``` shell
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-sudo apt install unzip
-unzip awscliv2.zip
-sudo ./aws/install -i /usr/local/aws-cli -b /usr/local/bin --update
+```text
+/       → frontend:3000
+/api    → api:3500
+```
+
+---
+
+# 🛠️ Tech Stack
+
+| Technology                       | Purpose                        |
+| -------------------------------- | ------------------------------ |
+| **React.js**                     | Frontend application           |
+| **Node.js**                      | Backend API                    |
+| **MongoDB**                      | Database                       |
+| **Docker**                       | Application containerization   |
+| **Kubernetes**                   | Container orchestration        |
+| **AWS EKS**                      | Managed Kubernetes cluster     |
+| **Amazon ECR**                   | Docker image registry          |
+| **AWS ALB**                      | External load balancing        |
+| **AWS Load Balancer Controller** | Kubernetes Ingress integration |
+| **kubectl**                      | Kubernetes cluster management  |
+| **eksctl**                       | EKS cluster provisioning       |
+| **AWS CLI**                      | AWS resource management        |
+| **Git & GitHub**                 | Source code management         |
+
+---
+
+# 📂 Project Structure
+
+```text
+Kubernetes-deployed-multi-service-app/
+│
+├── Application-Code/
+│   │
+│   ├── backend/
+│   │
+│   └── frontend/
+│
+├── Kubernetes-Manifests-file/
+│   │
+│   ├── Backend/
+│   │   ├── backend-deployment.yaml
+│   │   └── backend-service.yaml
+│   │
+│   ├── Database/
+│   │   ├── deployment.yaml
+│   │   ├── secrets.yaml
+│   │   └── service.yaml
+│   │
+│   ├── Frontend/
+│   │   ├── frontend-deployment.yaml
+│   │   └── frontend-service.yaml
+│   │
+│   └── ingress.yaml
+│
+├── assets/
+│
+└── README.md
+```
+
+---
+
+# ☸️ Kubernetes Architecture
+
+All application components are deployed inside the Kubernetes namespace:
+
+```text
+workshop
+```
+
+The cluster contains three primary workloads:
+
+```text
+Frontend
+Backend
+MongoDB
+```
+
+Each application component is managed through Kubernetes resources.
+
+---
+
+# 🎨 Frontend
+
+The frontend is a **React application** running inside a Kubernetes Deployment.
+
+### Deployment
+
+```text
+Deployment: frontend
+Namespace: workshop
+Replicas: 1
+Container Port: 3000
+```
+
+The application image is stored inside **Amazon ECR**.
+
+```text
+three-tier-frontend:latest
+```
+
+The frontend communicates with the backend through:
+
+```text
+http://todo.shreemant.im/api/tasks
+```
+
+The backend endpoint is configured through:
+
+```text
+REACT_APP_BACKEND_URL
+```
+
+---
+
+## Frontend Service
+
+The frontend is exposed internally through a Kubernetes `ClusterIP` Service.
+
+```text
+Service Name: frontend
+Type: ClusterIP
+Port: 3000
+```
+
+The service provides stable internal networking for frontend pods.
+
+---
+
+# ⚙️ Backend API
+
+The backend is deployed as a Node.js API.
+
+### Deployment
+
+```text
+Deployment: api
+Namespace: workshop
+Replicas: 1
+Container Port: 3500
+```
+
+The Docker image is stored in **Amazon ECR**:
+
+```text
+three-tier-backend:latest
+```
+
+The deployment uses:
+
+```yaml
+imagePullPolicy: Always
+```
+
+which ensures Kubernetes checks for the latest container image whenever the pod starts.
+
+---
+
+# 🗄️ Backend → MongoDB Connection
+
+The backend connects to MongoDB through Kubernetes service discovery.
+
+```text
+mongodb://mongodb-svc:27017/todo
+```
+
+Instead of using an IP address, the application communicates using the Kubernetes Service name:
+
+```text
+mongodb-svc
+```
+
+This allows Kubernetes DNS to automatically resolve the MongoDB service.
+
+---
+
+# 🔐 Kubernetes Secrets
+
+MongoDB credentials are provided to the application through Kubernetes Secrets.
+
+The backend retrieves:
+
+```text
+MONGO_USERNAME
+MONGO_PASSWORD
+```
+
+from:
+
+```text
+mongo-sec
+```
+
+Example:
+
+```yaml
+valueFrom:
+  secretKeyRef:
+    name: mongo-sec
+    key: username
+```
+
+This keeps credentials separate from the application container image.
+
+> In production environments, sensitive secret files should not be committed directly to public Git repositories. Use Kubernetes Secrets with external secret management solutions such as AWS Secrets Manager.
+
+---
+
+# ❤️ Kubernetes Health Checks
+
+The backend deployment includes both **Liveness** and **Readiness Probes**.
+
+The application exposes:
+
+```text
+/ok
+```
+
+on:
+
+```text
+Port 3500
+```
+
+---
+
+## Liveness Probe
+
+The liveness probe verifies that the backend container is still functioning.
+
+```text
+GET /ok
+Port 3500
+```
+
+If the application becomes unhealthy, Kubernetes can restart the container.
+
+---
+
+## Readiness Probe
+
+The readiness probe determines whether the application is ready to receive traffic.
+
+```text
+GET /ok
+Port 3500
+```
+
+Traffic is only sent to pods that pass the readiness check.
+
+---
+
+# 🔁 Rolling Updates
+
+Both the frontend and backend deployments use:
+
+```yaml
+strategy:
+  type: RollingUpdate
+```
+
+The configuration allows Kubernetes to gradually replace existing pods when a new application version is deployed.
+
+Example:
+
+```text
+Old Pod
+   │
+   ├── New Pod Created
+   │
+   ├── Health Check Passes
+   │
+   └── Old Pod Removed
+```
+
+This reduces downtime during application updates.
+
+---
+
+# 🗃️ MongoDB
+
+MongoDB runs inside the Kubernetes cluster.
+
+### Deployment
+
+```text
+Deployment: mongodb
+Namespace: workshop
+Replicas: 1
+Container Port: 27017
+```
+
+MongoDB image:
+
+```text
+mongo:4.4.6
+```
+
+MongoDB credentials are provided through:
+
+```text
+mongo-sec
+```
+
+using the environment variables:
+
+```text
+MONGO_INITDB_ROOT_USERNAME
+MONGO_INITDB_ROOT_PASSWORD
+```
+
+---
+
+# 🔌 MongoDB Service
+
+MongoDB is exposed internally using a Kubernetes Service.
+
+```text
+Service Name: mongodb-svc
+Port: 27017
+Target Port: 27017
+```
+
+The backend can therefore communicate with MongoDB using:
+
+```text
+mongodb-svc:27017
+```
+
+rather than directly connecting to a pod IP.
+
+---
+
+# 🌐 Kubernetes Services
+
+The project uses `ClusterIP` Services for internal communication.
+
+| Service       |    Port | Purpose          |
+| ------------- | ------: | ---------------- |
+| `frontend`    |  `3000` | React frontend   |
+| `api`         |  `3500` | Node.js backend  |
+| `mongodb-svc` | `27017` | MongoDB database |
+
+The frontend and backend are not directly exposed to the internet.
+
+External access is handled through the Kubernetes Ingress.
+
+---
+
+# 🌍 AWS Application Load Balancer
+
+External traffic is routed through an **AWS Application Load Balancer** created using the AWS Load Balancer Controller.
+
+Ingress configuration:
+
+```yaml
+ingressClassName: alb
+```
+
+The ALB is configured as:
+
+```text
+internet-facing
+```
+
+and uses:
+
+```text
+Target Type: IP
+Listener: HTTP 80
+```
+
+---
+
+# 🔀 Ingress Routing
+
+The project uses host-based and path-based routing.
+
+Domain:
+
+```text
+todo.shreemant.im
+```
+
+Routing configuration:
+
+```text
+todo.shreemant.im/
+        │
+        ▼
+frontend:3000
+```
+
+and:
+
+```text
+todo.shreemant.im/api
+        │
+        ▼
+api:3500
+```
+
+This allows both frontend and backend traffic to use the same domain.
+
+---
+
+# 🐳 Amazon ECR
+
+The frontend and backend Docker images are stored in **Amazon Elastic Container Registry**.
+
+Example repositories:
+
+```text
+three-tier-frontend
+three-tier-backend
+```
+
+The Kubernetes deployments pull these images directly from ECR.
+
+The manifests use:
+
+```text
+ecr-registry-secret
+```
+
+as an `imagePullSecret`.
+
+---
+
+# 🚀 Deployment Guide
+
+## 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/Shreemant-Acharya/Kubernetes-deployed-multi-service-app.git
+```
+
+Navigate into the project:
+
+```bash
+cd Kubernetes-deployed-multi-service-app
+```
+
+---
+
+# 2️⃣ Configure AWS CLI
+
+Install and configure AWS CLI.
+
+```bash
 aws configure
 ```
 
-### Step 4: Install Docker
-``` shell
-sudo apt-get update
-sudo apt install docker.io
-docker ps
-sudo chown $USER /var/run/docker.sock
+Provide:
+
+```text
+AWS Access Key ID
+AWS Secret Access Key
+Default Region
+Output Format
 ```
 
-### Step 5: Install kubectl
-``` shell
-curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
-chmod +x ./kubectl
-sudo mv ./kubectl /usr/local/bin
-kubectl version --short --client
+---
+
+# 3️⃣ Create the EKS Cluster
+
+Example cluster configuration:
+
+```bash
+eksctl create cluster \
+  --name three-tier-cluster \
+  --region us-west-2 \
+  --node-type t2.medium \
+  --nodes-min 2 \
+  --nodes-max 2
 ```
 
-### Step 6: Install eksctl
-``` shell
-curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-sudo mv /tmp/eksctl /usr/local/bin
-eksctl version
+Update your Kubernetes configuration:
+
+```bash
+aws eks update-kubeconfig \
+  --region us-west-2 \
+  --name three-tier-cluster
 ```
 
-### Step 7: Setup EKS Cluster
-``` shell
-eksctl create cluster --name three-tier-cluster --region us-west-2 --node-type t2.medium --nodes-min 2 --nodes-max 2
-aws eks update-kubeconfig --region us-west-2 --name three-tier-cluster
+Verify nodes:
+
+```bash
 kubectl get nodes
 ```
 
-### Step 8: Run Manifests
-``` shell
+---
+
+# 4️⃣ Create Kubernetes Namespace
+
+Create the namespace used by the manifests:
+
+```bash
 kubectl create namespace workshop
-kubectl apply -f .
-kubectl delete -f .
 ```
 
-### Step 9: Install AWS Load Balancer
-``` shell
-curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
-aws iam create-policy --policy-name AWSLoadBalancerControllerIAMPolicy --policy-document file://iam_policy.json
-eksctl utils associate-iam-oidc-provider --region=us-west-2 --cluster=three-tier-cluster --approve
-eksctl create iamserviceaccount --cluster=three-tier-cluster --namespace=kube-system --name=aws-load-balancer-controller --role-name AmazonEKSLoadBalancerControllerRole --attach-policy-arn=arn:aws:iam::626072240565:policy/AWSLoadBalancerControllerIAMPolicy --approve --region=us-west-2
-```
+Verify:
 
-### Step 10: Deploy AWS Load Balancer Controller
-``` shell
-sudo snap install helm --classic
-helm repo add eks https://aws.github.io/eks-charts
-helm repo update eks
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=my-cluster --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
-kubectl get deployment -n kube-system aws-load-balancer-controller
-kubectl apply -f full_stack_lb.yaml
+```bash
+kubectl get namespaces
 ```
-
-### Cleanup
-- To delete the EKS cluster:
-``` shell
-eksctl delete cluster --name three-tier-cluster --region us-west-2
-```
-- To clean up rest of the stuff and not incure any cost
-```
-Stop or Terminate the EC2 instance created in step 2.
-Delete the Load Balancer created in step 9 and 10.
-Go to EC2 console, access security group section and delete security groups created in previous steps
-```
-
-## Contribution Guidelines
-- Fork the repository and create your feature branch.
-- Deploy the application, adding your creative enhancements.
-- Ensure your code adheres to the project's style and contribution guidelines.
-- Submit a Pull Request with a detailed description of your changes.
-
-## Rewards
-- Successful PR merges will be eligible for exciting prizes!
-
-## Support
-For any queries or issues, please open an issue in the repository.
 
 ---
-Happy Learning! 🚀👨‍💻👩‍💻
+
+# 5️⃣ Create ECR Authentication Secret
+
+If required by your cluster configuration, create an ECR registry secret inside the `workshop` namespace:
+
+```bash
+kubectl create secret docker-registry ecr-registry-secret \
+  --docker-server=<AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com \
+  --docker-username=AWS \
+  --docker-password="$(aws ecr get-login-password --region <REGION>)" \
+  --namespace workshop
+```
+
+Verify:
+
+```bash
+kubectl get secrets -n workshop
+```
+
+---
+
+# 6️⃣ Deploy MongoDB
+
+```bash
+kubectl apply -f Kubernetes-Manifests-file/Database/
+```
+
+Verify:
+
+```bash
+kubectl get pods -n workshop
+```
+
+Check the MongoDB service:
+
+```bash
+kubectl get svc -n workshop
+```
+
+---
+
+# 7️⃣ Deploy Backend
+
+```bash
+kubectl apply -f Kubernetes-Manifests-file/Backend/
+```
+
+Verify:
+
+```bash
+kubectl get deployment api -n workshop
+```
+
+Check pods:
+
+```bash
+kubectl get pods -n workshop
+```
+
+---
+
+# 8️⃣ Deploy Frontend
+
+```bash
+kubectl apply -f Kubernetes-Manifests-file/Frontend/
+```
+
+Verify:
+
+```bash
+kubectl get deployment frontend -n workshop
+```
+
+---
+
+# 9️⃣ Verify All Resources
+
+```bash
+kubectl get all -n workshop
+```
+
+Expected architecture:
+
+```text
+frontend pod
+api pod
+mongodb pod
+
+frontend service
+api service
+mongodb-svc service
+```
+
+---
+
+# 🔟 Install AWS Load Balancer Controller
+
+Add the EKS Helm repository:
+
+```bash
+helm repo add eks https://aws.github.io/eks-charts
+```
+
+Update repositories:
+
+```bash
+helm repo update
+```
+
+Install the AWS Load Balancer Controller after configuring the required IAM role and service account:
+
+```bash
+helm install aws-load-balancer-controller \
+  eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=three-tier-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller
+```
+
+Verify:
+
+```bash
+kubectl get deployment \
+  -n kube-system \
+  aws-load-balancer-controller
+```
+
+---
+
+# 1️⃣1️⃣ Deploy Ingress
+
+Apply the Ingress resource:
+
+```bash
+kubectl apply -f Kubernetes-Manifests-file/ingress.yaml
+```
+
+Verify:
+
+```bash
+kubectl get ingress -n workshop
+```
+
+After the AWS Load Balancer Controller provisions an ALB, an AWS load balancer DNS name should appear.
+
+---
+
+# 🌐 Domain Configuration
+
+The application uses:
+
+```text
+todo.shreemant.im
+```
+
+Create a DNS record pointing the subdomain to the Application Load Balancer.
+
+Traffic then follows:
+
+```text
+todo.shreemant.im
+        │
+        ▼
+AWS ALB
+        │
+        ▼
+Kubernetes Ingress
+        │
+        ├── / → frontend
+        │
+        └── /api → backend
+```
+
+---
+
+# 🔎 Useful Kubernetes Commands
+
+### Check Pods
+
+```bash
+kubectl get pods -n workshop
+```
+
+### Check Deployments
+
+```bash
+kubectl get deployments -n workshop
+```
+
+### Check Services
+
+```bash
+kubectl get svc -n workshop
+```
+
+### Check Ingress
+
+```bash
+kubectl get ingress -n workshop
+```
+
+### View Pod Details
+
+```bash
+kubectl describe pod <pod-name> -n workshop
+```
+
+### View Application Logs
+
+```bash
+kubectl logs <pod-name> -n workshop
+```
+
+### Watch Pods
+
+```bash
+kubectl get pods -n workshop -w
+```
+
+### Check All Resources
+
+```bash
+kubectl get all -n workshop
+```
+
+---
+
+# 🔄 Updating the Application
+
+After building and pushing a new image to Amazon ECR:
+
+```text
+three-tier-frontend:latest
+```
+
+or:
+
+```text
+three-tier-backend:latest
+```
+
+restart the deployment:
+
+```bash
+kubectl rollout restart deployment frontend -n workshop
+```
+
+```bash
+kubectl rollout restart deployment api -n workshop
+```
+
+Monitor the rollout:
+
+```bash
+kubectl rollout status deployment/frontend -n workshop
+```
+
+```bash
+kubectl rollout status deployment/api -n workshop
+```
+
+---
+
+# 🧪 Troubleshooting
+
+## Check Pod Status
+
+```bash
+kubectl get pods -n workshop
+```
+
+---
+
+## Check Pod Logs
+
+```bash
+kubectl logs <pod-name> -n workshop
+```
+
+---
+
+## Check Backend Health
+
+```bash
+kubectl port-forward service/api 3500:3500 -n workshop
+```
+
+Then access:
+
+```text
+http://localhost:3500/ok
+```
+
+---
+
+## Check Frontend Locally
+
+```bash
+kubectl port-forward service/frontend 3000:3000 -n workshop
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
+
+---
+
+## Check MongoDB Service
+
+```bash
+kubectl get svc mongodb-svc -n workshop
+```
+
+---
+
+## Check Ingress
+
+```bash
+kubectl describe ingress mainlb -n workshop
+```
+
+---
+
+# 🧹 Cleanup
+
+Delete the Kubernetes workloads:
+
+```bash
+kubectl delete -f Kubernetes-Manifests-file/ingress.yaml
+```
+
+```bash
+kubectl delete -f Kubernetes-Manifests-file/Frontend/
+```
+
+```bash
+kubectl delete -f Kubernetes-Manifests-file/Backend/
+```
+
+```bash
+kubectl delete -f Kubernetes-Manifests-file/Database/
+```
+
+Delete the namespace:
+
+```bash
+kubectl delete namespace workshop
+```
+
+---
+
+# ☁️ Delete EKS Cluster
+
+To avoid unnecessary AWS charges:
+
+```bash
+eksctl delete cluster \
+  --name three-tier-cluster \
+  --region us-west-2
+```
+
+Also verify that associated AWS resources such as:
+
+```text
+Application Load Balancers
+Target Groups
+Security Groups
+ECR repositories
+EC2 resources
+```
+
+are no longer required.
+
+---
+
+# 🎯 DevOps Concepts Demonstrated
+
+This project demonstrates practical experience with:
+
+* Kubernetes Deployments
+* Kubernetes Services
+* Kubernetes Secrets
+* Kubernetes Namespaces
+* Container networking
+* Kubernetes DNS/service discovery
+* Liveness probes
+* Readiness probes
+* Rolling deployments
+* Multi-container application architecture
+* Docker containerization
+* Amazon ECR
+* Amazon EKS
+* AWS Load Balancer Controller
+* Application Load Balancer
+* Kubernetes Ingress
+* AWS infrastructure
+
+---
+
+# 🔮 Future Improvements
+
+Possible improvements include:
+
+* Horizontal Pod Autoscaling
+* Helm chart packaging
+* HTTPS using AWS Certificate Manager
+* Terraform infrastructure provisioning
+* GitHub Actions CI/CD
+* Persistent Volumes for MongoDB
+* Amazon DocumentDB or MongoDB Atlas
+* Prometheus and Grafana monitoring
+
+---
+
+# 👨‍💻 Author
+
+**Shreemant Acharya**
+
+GitHub: `Shreemant-Acharya`
+
+---
+
+# ⭐ Project Summary
+
+> Deployed a three-tier containerized application consisting of React, Node.js, and MongoDB on Amazon EKS using Kubernetes Deployments, Services, Secrets, health probes, and ALB Ingress. Container images are stored in Amazon ECR, internal communication is handled through Kubernetes service discovery, and external traffic is routed through an AWS Application Load Balancer using `todo.shreemant.im`.
